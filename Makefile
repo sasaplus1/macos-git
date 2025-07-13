@@ -170,5 +170,5 @@ install-gettext: ## [subtarget] install gettext
 install-git: ## [subtarget] install git
 	$(RM) -r '$(root)/usr/src/git-$(git_version)'
 	tar fvx '$(root)/usr/src/git-$(git_version).tar.gz' -C '$(root)/usr/src'
-	cd '$(root)/usr/src/git-$(git_version)' && $(git_configs) PKG_CONFIG_PATH='$(pkg_config_path)' make prefix='$(prefix)' -j$(nproc) CFLAGS='-I$(prefix)/include' LDFLAGS='-L$(prefix)/lib -static-libgcc'
+	cd '$(root)/usr/src/git-$(git_version)' && $(git_configs) PKG_CONFIG_PATH='$(pkg_config_path)' make prefix='$(prefix)' -j$(nproc) CFLAGS='-I$(prefix)/include' LDFLAGS='-L$(prefix)/lib'
 	$(git_configs) make install prefix='$(prefix)' -C '$(root)/usr/src/git-$(git_version)'
