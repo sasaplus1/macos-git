@@ -35,6 +35,7 @@ curl_configs := $(strip \
   --without-zstd \
   --without-libpsl \
   --without-nghttp2 \
+  --without-libidn2 \
   --disable-ldap \
   --disable-ldaps \
 )
@@ -71,6 +72,7 @@ gettext_configs := $(strip \
 git_version := 2.50.1
 git_configs := $(strip \
   NO_OPENSSL=YesPlease \
+  NEEDS_LIBICONV=YesPlease \
 )
 
 .PHONY: all
@@ -168,8 +170,12 @@ install-gettext: ## [subtarget] install gettext
 	make install -C '$(root)/usr/src/gettext-$(gettext_version)'
 
 .PHONY: install-git
+install-git: CFLAGS := -I$(prefix)/include
+install-git: LDFLAGS := -L$(prefix)/lib -framework CoreFoundation -framework Security -framework SystemConfiguration
+install-git: EXTLIBS := $(prefix)/lib/libz.a $(prefix)/lib/libiconv.a $(prefix)/lib/libintl.a $(prefix)/lib/libpcre2-8.a -framework CoreFoundation -framework Security -framework SystemConfiguration
+install-git: MAKE_VARS := PKG_CONFIG_PATH='$(pkg_config_path)' USE_LIBPCRE2=Yes ZLIB_PATH='$(prefix)'
 install-git: ## [subtarget] install git
 	$(RM) -r '$(root)/usr/src/git-$(git_version)'
 	tar fvx '$(root)/usr/src/git-$(git_version).tar.gz' -C '$(root)/usr/src'
-	cd '$(root)/usr/src/git-$(git_version)' && $(git_configs) PKG_CONFIG_PATH='$(pkg_config_path)' make prefix='$(prefix)' -j$(nproc) CFLAGS='-I$(prefix)/include' LDFLAGS='-L$(prefix)/lib'
-	$(git_configs) make install prefix='$(prefix)' -C '$(root)/usr/src/git-$(git_version)'
+	cd '$(root)/usr/src/git-$(git_version)' && $(git_configs) $(MAKE_VARS) make prefix='$(prefix)' -j$(nproc) CFLAGS='$(CFLAGS)' LDFLAGS='$(LDFLAGS)' EXTLIBS='$(EXTLIBS)'
+	$(git_configs) $(MAKE_VARS) make install prefix='$(prefix)' -C '$(root)/usr/src/git-$(git_version)' EXTLIBS='$(EXTLIBS)'
