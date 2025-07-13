@@ -18,7 +18,7 @@ zlib_configs := $(strip \
   --static \
 )
 
-libiconv_version := 1.17
+libiconv_version := 1.18
 libiconv_configs := $(strip \
   --enable-static \
   --disable-shared \
