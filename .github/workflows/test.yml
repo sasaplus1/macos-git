@@ -1,0 +1,116 @@
+name: test
+
+on:
+  push:
+    paths:
+      - '.github/workflows/test.yml'
+      - 'Makefile'
+      - 'usr'
+  pull_request:
+    paths:
+      - '.github/workflows/test.yml'
+      - 'Makefile'
+      - 'usr'
+
+jobs:
+  build:
+    name: build
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-13
+          # arm64
+          - macos-14
+          - macos-15
+    env:
+      CC: 'ccache gcc'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: hendrikmuhs/ccache-action@63069e3931dedbf3b63792097479563182fe70d1 # v1.2
+      - run: echo "PATH=/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH" | tee -a "$GITHUB_ENV"
+      - run: ccache --show-config
+      - run: ccache -z  # Zero statistics
+      - id: ccache
+        run: echo "cache_dir=$(ccache --show-config | grep cache_dir | awk '{ print $4 }')" | tee -a "$GITHUB_OUTPUT"
+      - uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        id: cache-restore
+        with:
+          path: |
+            ${{ steps.ccache.outputs.cache_dir }}
+            usr/src
+          key: ccache-${{ matrix.os }}-git-${{ hashFiles('usr/src/*.tar.*') }}
+          restore-keys: |
+            ccache-${{ matrix.os }}-git-${{ hashFiles('usr/src/*.tar.*') }}
+            ccache-${{ matrix.os }}-git-
+            ccache-${{ matrix.os }}-
+            ccache-
+      - id: machine-arch
+        run: echo "name=$(arch)" | tee -a "$GITHUB_OUTPUT"
+      - run: make
+      # Build dependencies in order
+      - run: make download-zlib
+      - run: make install-zlib
+      - run: make download-libiconv
+      - run: make install-libiconv
+      - run: make download-curl
+      - run: make install-curl
+      - run: make download-expat
+      - run: make install-expat
+      - run: make download-pcre2
+      - run: make install-pcre2
+      - run: make download-gettext
+      - run: make install-gettext
+      - run: ccache -s
+      # Build Git
+      - run: make download-git
+      - run: make install-git
+      - run: ccache -s
+      - if: github.ref_name == 'master'
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: |
+            ${{ steps.ccache.outputs.cache_dir }}
+            usr/src
+          key: ccache-${{ matrix.os }}-git-${{ hashFiles('usr/src/*.tar.*') }}
+      - run: lipo -archs ./usr/bin/git
+      - id: git-arch
+        run: echo "name=$(lipo -archs ./usr/bin/git)" | tee -a "$GITHUB_OUTPUT"
+      - run: otool -l ./usr/bin/git
+      - run: otool -L ./usr/bin/git
+      - run: ./usr/bin/git --version
+      - name: test git functionality
+        run: |
+          export PATH="$(pwd)/usr/bin:$PATH"
+          git init test-repo
+          cd test-repo
+          git config user.name "Test User"
+          git config user.email "test@example.com"
+          echo "test content" > test.txt
+          git add test.txt
+          git commit -m "test commit"
+          git log --oneline
+          git status
+      - name: test pcre2 functionality
+        run: |
+          export PATH="$(pwd)/usr/bin:$PATH"
+          cd test-repo
+          echo "pattern matching test" > pattern.txt
+          git add pattern.txt
+          git commit -m "add pattern file"
+          git grep -P "patt.*match" || echo "PCRE2 grep test completed"
+      - run: mv -f ./usr ./macos-git
+      # Create archive
+      - run: >
+          tar cfvJ ${{ matrix.os }}-${{ steps.git-arch.outputs.name }}-git.tar.xz
+          macos-git/bin
+          macos-git/lib
+          macos-git/libexec
+          macos-git/share
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ${{ matrix.os }}-${{ steps.git-arch.outputs.name }}-git
+          path: ${{ matrix.os }}-${{ steps.git-arch.outputs.name }}-git.tar.xz
+          if-no-files-found: error
