@@ -33,6 +33,7 @@ curl_configs := $(strip \
   --with-secure-transport \
   --without-brotli \
   --without-zstd \
+  --without-libpsl \
   --disable-ldap \
   --disable-ldaps \
 )
