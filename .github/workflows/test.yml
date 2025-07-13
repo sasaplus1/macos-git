@@ -81,9 +81,9 @@ jobs:
       - run: otool -l ./usr/bin/git
       - run: otool -L ./usr/bin/git
       - run: ./usr/bin/git --version
+      - run: echo "$(pwd)/usr/bin" >> "$GITHUB_PATH"
       - name: test git functionality
         run: |
-          export PATH="$(pwd)/usr/bin:$PATH"
           git init test-repo
           cd test-repo
           git config user.name "Test User"
@@ -95,7 +95,6 @@ jobs:
           git status
       - name: test pcre2 functionality
         run: |
-          export PATH="$(pwd)/usr/bin:$PATH"
           cd test-repo
           echo "pattern matching test" > pattern.txt
           git add pattern.txt
