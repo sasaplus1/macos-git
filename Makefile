@@ -95,76 +95,83 @@ install: download-git install-git
 
 .PHONY: download-zlib
 download-zlib: ## [subtarget] download zlib archive
-	curl -fsSL -o '$(root)/usr/src/zlib-$(zlib_version).tar.gz' https://github.com/madler/zlib/releases/download/v$(zlib_version)/zlib-$(zlib_version).tar.gz
+	@test -f '$(root)/usr/src/zlib-$(zlib_version).tar.gz' || \
+		curl -fsSL -o '$(root)/usr/src/zlib-$(zlib_version).tar.gz' https://github.com/madler/zlib/releases/download/v$(zlib_version)/zlib-$(zlib_version).tar.gz
 
 .PHONY: download-libiconv
 download-libiconv: ## [subtarget] download libiconv archive
-	curl -fsSL -o '$(root)/usr/src/libiconv-$(libiconv_version).tar.gz' https://ftp.gnu.org/pub/gnu/libiconv/libiconv-$(libiconv_version).tar.gz
+	@test -f '$(root)/usr/src/libiconv-$(libiconv_version).tar.gz' || \
+		curl -fsSL -o '$(root)/usr/src/libiconv-$(libiconv_version).tar.gz' https://ftp.gnu.org/pub/gnu/libiconv/libiconv-$(libiconv_version).tar.gz
 
 .PHONY: download-curl
 download-curl: ## [subtarget] download curl archive
-	curl -fsSL -o '$(root)/usr/src/curl-$(curl_version).tar.gz' https://curl.se/download/curl-$(curl_version).tar.gz
+	@test -f '$(root)/usr/src/curl-$(curl_version).tar.gz' || \
+		curl -fsSL -o '$(root)/usr/src/curl-$(curl_version).tar.gz' https://curl.se/download/curl-$(curl_version).tar.gz
 
 .PHONY: download-expat
 download-expat: ## [subtarget] download expat archive
-	curl -fsSL -o '$(root)/usr/src/expat-$(expat_version).tar.gz' https://github.com/libexpat/libexpat/releases/download/R_$(subst .,_,$(expat_version))/expat-$(expat_version).tar.gz
+	@test -f '$(root)/usr/src/expat-$(expat_version).tar.gz' || \
+		curl -fsSL -o '$(root)/usr/src/expat-$(expat_version).tar.gz' https://github.com/libexpat/libexpat/releases/download/R_$(subst .,_,$(expat_version))/expat-$(expat_version).tar.gz
 
 .PHONY: download-pcre2
 download-pcre2: ## [subtarget] download pcre2 archive
-	curl -fsSL -o '$(root)/usr/src/pcre2-$(pcre2_version).tar.gz' https://github.com/PCRE2Project/pcre2/releases/download/pcre2-$(pcre2_version)/pcre2-$(pcre2_version).tar.gz
+	@test -f '$(root)/usr/src/pcre2-$(pcre2_version).tar.gz' || \
+		curl -fsSL -o '$(root)/usr/src/pcre2-$(pcre2_version).tar.gz' https://github.com/PCRE2Project/pcre2/releases/download/pcre2-$(pcre2_version)/pcre2-$(pcre2_version).tar.gz
 
 .PHONY: download-gettext
 download-gettext: ## [subtarget] download gettext archive
-	curl -fsSL -o '$(root)/usr/src/gettext-$(gettext_version).tar.gz' https://ftp.gnu.org/gnu/gettext/gettext-$(gettext_version).tar.gz
+	@test -f '$(root)/usr/src/gettext-$(gettext_version).tar.gz' || \
+		curl -fsSL -o '$(root)/usr/src/gettext-$(gettext_version).tar.gz' https://ftp.gnu.org/gnu/gettext/gettext-$(gettext_version).tar.gz
 
 .PHONY: download-git
 download-git: ## [subtarget] download git archive
-	curl -fsSL -o '$(root)/usr/src/git-$(git_version).tar.gz' https://www.kernel.org/pub/software/scm/git/git-$(git_version).tar.gz
+	@test -f '$(root)/usr/src/git-$(git_version).tar.gz' || \
+		curl -fsSL -o '$(root)/usr/src/git-$(git_version).tar.gz' https://www.kernel.org/pub/software/scm/git/git-$(git_version).tar.gz
 
 .PHONY: install-zlib
 install-zlib: ## [subtarget] install zlib
-	$(RM) -r '$(root)/usr/src/zlib-$(zlib_version)'
-	tar fvx '$(root)/usr/src/zlib-$(zlib_version).tar.gz' -C '$(root)/usr/src'
+	@test -d '$(root)/usr/src/zlib-$(zlib_version)' || \
+		tar fvx '$(root)/usr/src/zlib-$(zlib_version).tar.gz' -C '$(root)/usr/src'
 	cd '$(root)/usr/src/zlib-$(zlib_version)' && ./configure --prefix='$(prefix)' $(zlib_configs)
 	make -j$(nproc) -C '$(root)/usr/src/zlib-$(zlib_version)'
 	make install -C '$(root)/usr/src/zlib-$(zlib_version)'
 
 .PHONY: install-libiconv
 install-libiconv: ## [subtarget] install libiconv
-	$(RM) -r '$(root)/usr/src/libiconv-$(libiconv_version)'
-	tar fvx '$(root)/usr/src/libiconv-$(libiconv_version).tar.gz' -C '$(root)/usr/src'
+	@test -d '$(root)/usr/src/libiconv-$(libiconv_version)' || \
+		tar fvx '$(root)/usr/src/libiconv-$(libiconv_version).tar.gz' -C '$(root)/usr/src'
 	cd '$(root)/usr/src/libiconv-$(libiconv_version)' && ./configure --prefix='$(prefix)' $(libiconv_configs)
 	make -j$(nproc) -C '$(root)/usr/src/libiconv-$(libiconv_version)'
 	make install -C '$(root)/usr/src/libiconv-$(libiconv_version)'
 
 .PHONY: install-curl
 install-curl: ## [subtarget] install curl
-	$(RM) -r '$(root)/usr/src/curl-$(curl_version)'
-	tar fvx '$(root)/usr/src/curl-$(curl_version).tar.gz' -C '$(root)/usr/src'
+	@test -d '$(root)/usr/src/curl-$(curl_version)' || \
+		tar fvx '$(root)/usr/src/curl-$(curl_version).tar.gz' -C '$(root)/usr/src'
 	cd '$(root)/usr/src/curl-$(curl_version)' && PKG_CONFIG_PATH='$(pkg_config_path)' ./configure --prefix='$(prefix)' $(curl_configs)
 	make -j$(nproc) -C '$(root)/usr/src/curl-$(curl_version)'
 	make install -C '$(root)/usr/src/curl-$(curl_version)'
 
 .PHONY: install-expat
 install-expat: ## [subtarget] install expat
-	$(RM) -r '$(root)/usr/src/expat-$(expat_version)'
-	tar fvx '$(root)/usr/src/expat-$(expat_version).tar.gz' -C '$(root)/usr/src'
+	@test -d '$(root)/usr/src/expat-$(expat_version)' || \
+		tar fvx '$(root)/usr/src/expat-$(expat_version).tar.gz' -C '$(root)/usr/src'
 	cd '$(root)/usr/src/expat-$(expat_version)' && ./configure --prefix='$(prefix)' $(expat_configs)
 	make -j$(nproc) -C '$(root)/usr/src/expat-$(expat_version)'
 	make install -C '$(root)/usr/src/expat-$(expat_version)'
 
 .PHONY: install-pcre2
 install-pcre2: ## [subtarget] install pcre2
-	$(RM) -r '$(root)/usr/src/pcre2-$(pcre2_version)'
-	tar fvx '$(root)/usr/src/pcre2-$(pcre2_version).tar.gz' -C '$(root)/usr/src'
+	@test -d '$(root)/usr/src/pcre2-$(pcre2_version)' || \
+		tar fvx '$(root)/usr/src/pcre2-$(pcre2_version).tar.gz' -C '$(root)/usr/src'
 	cd '$(root)/usr/src/pcre2-$(pcre2_version)' && ./configure --prefix='$(prefix)' $(pcre2_configs)
 	make -j$(nproc) -C '$(root)/usr/src/pcre2-$(pcre2_version)'
 	make install -C '$(root)/usr/src/pcre2-$(pcre2_version)'
 
 .PHONY: install-gettext
 install-gettext: ## [subtarget] install gettext
-	$(RM) -r '$(root)/usr/src/gettext-$(gettext_version)'
-	tar fvx '$(root)/usr/src/gettext-$(gettext_version).tar.gz' -C '$(root)/usr/src'
+	@test -d '$(root)/usr/src/gettext-$(gettext_version)' || \
+		tar fvx '$(root)/usr/src/gettext-$(gettext_version).tar.gz' -C '$(root)/usr/src'
 	cd '$(root)/usr/src/gettext-$(gettext_version)' && ./configure --prefix='$(prefix)' $(gettext_configs)
 	make -j$(nproc) -C '$(root)/usr/src/gettext-$(gettext_version)'
 	make install -C '$(root)/usr/src/gettext-$(gettext_version)'
@@ -175,7 +182,10 @@ install-git: LDFLAGS := -L$(prefix)/lib -framework CoreFoundation -framework Sec
 install-git: EXTLIBS := $(prefix)/lib/libz.a $(prefix)/lib/libiconv.a $(prefix)/lib/libintl.a $(prefix)/lib/libpcre2-8.a -framework CoreFoundation -framework Security -framework SystemConfiguration
 install-git: MAKE_VARS := PKG_CONFIG_PATH='$(pkg_config_path)' USE_LIBPCRE2=Yes ZLIB_PATH='$(prefix)'
 install-git: ## [subtarget] install git
-	$(RM) -r '$(root)/usr/src/git-$(git_version)'
-	tar fvx '$(root)/usr/src/git-$(git_version).tar.gz' -C '$(root)/usr/src'
+	@test -d '$(root)/usr/src/git-$(git_version)' || \
+		tar fvx '$(root)/usr/src/git-$(git_version).tar.gz' -C '$(root)/usr/src'
+	# Clean up Git-specific build files for incremental builds
+	@test ! -d '$(root)/usr/src/git-$(git_version)' || \
+		$(RM) -f '$(root)/usr/src/git-$(git_version)'/GIT-* '$(root)/usr/src/git-$(git_version)'/config.status
 	cd '$(root)/usr/src/git-$(git_version)' && $(git_configs) $(MAKE_VARS) make prefix='$(prefix)' -j$(nproc) CFLAGS='$(CFLAGS)' LDFLAGS='$(LDFLAGS)' EXTLIBS='$(EXTLIBS)'
 	$(git_configs) $(MAKE_VARS) make install prefix='$(prefix)' -C '$(root)/usr/src/git-$(git_version)' EXTLIBS='$(EXTLIBS)'
