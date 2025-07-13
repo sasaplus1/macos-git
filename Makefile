@@ -184,8 +184,19 @@ install-git: MAKE_VARS := PKG_CONFIG_PATH='$(pkg_config_path)' USE_LIBPCRE2=Yes 
 install-git: ## [subtarget] install git
 	@test -d '$(root)/usr/src/git-$(git_version)' || \
 		tar fvx '$(root)/usr/src/git-$(git_version).tar.gz' -C '$(root)/usr/src'
-	# Clean up Git-specific build files for incremental builds
+	# Clean up Git-specific generated files for incremental builds (but keep source files)
 	@test ! -d '$(root)/usr/src/git-$(git_version)' || \
-		$(RM) -f '$(root)/usr/src/git-$(git_version)'/GIT-* '$(root)/usr/src/git-$(git_version)'/config.status
+		$(RM) -f '$(root)/usr/src/git-$(git_version)'/GIT-BUILD-OPTIONS \
+			'$(root)/usr/src/git-$(git_version)'/GIT-CFLAGS \
+			'$(root)/usr/src/git-$(git_version)'/GIT-LDFLAGS \
+			'$(root)/usr/src/git-$(git_version)'/GIT-PREFIX \
+			'$(root)/usr/src/git-$(git_version)'/GIT-PERL-DEFINES \
+			'$(root)/usr/src/git-$(git_version)'/GIT-PERL-HEADER \
+			'$(root)/usr/src/git-$(git_version)'/GIT-PYTHON-VARS \
+			'$(root)/usr/src/git-$(git_version)'/GIT-SCRIPT-DEFINES \
+			'$(root)/usr/src/git-$(git_version)'/GIT-TEST-SUITES \
+			'$(root)/usr/src/git-$(git_version)'/GIT-USER-AGENT \
+			'$(root)/usr/src/git-$(git_version)'/GIT-VERSION-FILE \
+			'$(root)/usr/src/git-$(git_version)'/config.status
 	cd '$(root)/usr/src/git-$(git_version)' && $(git_configs) $(MAKE_VARS) make prefix='$(prefix)' -j$(nproc) CFLAGS='$(CFLAGS)' LDFLAGS='$(LDFLAGS)' EXTLIBS='$(EXTLIBS)'
 	$(git_configs) $(MAKE_VARS) make install prefix='$(prefix)' -C '$(root)/usr/src/git-$(git_version)' EXTLIBS='$(EXTLIBS)'
