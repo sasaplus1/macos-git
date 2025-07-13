@@ -1,0 +1,112 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "local>sasaplus1/renovate-config:main.json5",
+    "local>sasaplus1/renovate-config:automerge-all.json5",
+    ":assignee(sasaplus1)"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^Makefile$/"
+      ],
+      "matchStrings": [
+        "zlib_version\\s*:?=\\s*(?<currentValue>\\S+)"
+      ],
+      "depNameTemplate": "madler/zlib",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.+)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^Makefile$/"
+      ],
+      "matchStrings": [
+        "libiconv_version\\s*:?=\\s*(?<currentValue>\\S+)"
+      ],
+      "depNameTemplate": "libiconv",
+      "datasourceTemplate": "custom.libiconv",
+      "extractVersionTemplate": "^libiconv-(?<version>.+)\\.tar\\.gz$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^Makefile$/"
+      ],
+      "matchStrings": [
+        "curl_version\\s*:?=\\s*(?<currentValue>\\S+)"
+      ],
+      "depNameTemplate": "curl",
+      "datasourceTemplate": "custom.curl",
+      "extractVersionTemplate": "^curl-(?<version>.+)\\.tar\\.gz$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^Makefile$/"
+      ],
+      "matchStrings": [
+        "expat_version\\s*:?=\\s*(?<currentValue>\\S+)"
+      ],
+      "depNameTemplate": "libexpat/libexpat",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^R_(?<version>.+)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^Makefile$/"
+      ],
+      "matchStrings": [
+        "pcre2_version\\s*:?=\\s*(?<currentValue>\\S+)"
+      ],
+      "depNameTemplate": "PCRE2Project/pcre2",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^pcre2-(?<version>.+)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^Makefile$/"
+      ],
+      "matchStrings": [
+        "gettext_version\\s*:?=\\s*(?<currentValue>\\S+)"
+      ],
+      "depNameTemplate": "gettext",
+      "datasourceTemplate": "custom.gettext",
+      "extractVersionTemplate": "^gettext-(?<version>.+)\\.tar\\.gz$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^Makefile$/"
+      ],
+      "matchStrings": [
+        "git_version\\s*:?=\\s*(?<currentValue>\\S+)"
+      ],
+      "depNameTemplate": "git",
+      "datasourceTemplate": "custom.git",
+      "extractVersionTemplate": "^git-(?<version>.+)\\.tar\\.gz$"
+    }
+  ],
+  "customDatasources": {
+    "libiconv": {
+      "defaultRegistryUrlTemplate": "https://ftp.gnu.org/gnu/libiconv/",
+      "format": "html"
+    },
+    "curl": {
+      "defaultRegistryUrlTemplate": "https://curl.se/download/",
+      "format": "html"
+    },
+    "gettext": {
+      "defaultRegistryUrlTemplate": "https://ftp.gnu.org/gnu/gettext/",
+      "format": "html"
+    },
+    "git": {
+      "defaultRegistryUrlTemplate": "https://www.kernel.org/pub/software/scm/git/",
+      "format": "html"
+    }
+  }
+}
