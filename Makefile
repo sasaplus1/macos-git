@@ -67,6 +67,18 @@ gettext_configs := $(strip \
   --disable-java \
   --disable-csharp \
   --disable-rpath \
+  --disable-dependency-tracking \
+  --disable-c++ \
+  --disable-d \
+  --disable-modula2 \
+  --disable-libasprintf \
+  --disable-curses \
+  --disable-openmp \
+  --disable-acl \
+  --disable-xattr \
+  --without-git \
+  --without-bzip2 \
+  --without-xz \
 )
 
 git_version := 2.50.1
