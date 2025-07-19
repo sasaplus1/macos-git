@@ -58,7 +58,7 @@ pcre2_configs := $(strip \
   --enable-pcre2grep-libz \
 )
 
-gettext_version := 0.25.1
+gettext_version := 0.26
 gettext_configs := $(strip \
   --enable-static \
   --disable-shared \
