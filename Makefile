@@ -93,7 +93,7 @@ all: ## output targets
 
 .PHONY: clean
 clean: ## remove files
-	$(RM) -r $(root)/usr/bin/* $(root)/usr/include/* $(root)/usr/lib/* $(root)/usr/man/* $(root)/usr/share/* $(root)/usr/src/*
+	$(RM) -r $(root)/usr/bin/* $(root)/usr/include/* $(root)/usr/lib/* $(root)/usr/libexec/* $(root)/usr/man/* $(root)/usr/share/* $(root)/usr/src/*
 
 .PHONY: install
 install: ## install git and dependencies
