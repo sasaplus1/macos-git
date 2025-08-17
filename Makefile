@@ -63,7 +63,6 @@ gettext_configs := $(strip \
   --enable-static \
   --disable-shared \
   --with-included-gettext \
-  --with-libiconv-prefix=$(prefix) \
   --disable-java \
   --disable-csharp \
   --disable-rpath \
@@ -84,7 +83,8 @@ gettext_configs := $(strip \
 git_version := 2.52.0
 git_configs := $(strip \
   NO_OPENSSL=YesPlease \
-  NEEDS_LIBICONV=YesPlease \
+  NO_DARWIN_PORTS=YesPlease \
+  NEEDS_LIBICONV= \
 )
 
 .PHONY: all
@@ -98,7 +98,6 @@ clean: ## remove files
 .PHONY: install
 install: ## install git and dependencies
 install: download-zlib install-zlib
-install: download-libiconv install-libiconv
 install: download-curl install-curl
 install: download-expat install-expat
 install: download-pcre2 install-pcre2
@@ -181,17 +180,18 @@ install-pcre2: ## [subtarget] install pcre2
 	make install -C '$(root)/usr/src/pcre2-$(pcre2_version)'
 
 .PHONY: install-gettext
+install-gettext: CFLAGS := -Wno-incompatible-function-pointer-types
 install-gettext: ## [subtarget] install gettext
 	@test -d '$(root)/usr/src/gettext-$(gettext_version)' || \
 		tar fvx '$(root)/usr/src/gettext-$(gettext_version).tar.gz' -C '$(root)/usr/src'
-	cd '$(root)/usr/src/gettext-$(gettext_version)' && ./configure --prefix='$(prefix)' $(gettext_configs)
+	cd '$(root)/usr/src/gettext-$(gettext_version)' && CFLAGS='$(CFLAGS)' ./configure --prefix='$(prefix)' $(gettext_configs)
 	make -j$(nproc) -C '$(root)/usr/src/gettext-$(gettext_version)'
 	make install -C '$(root)/usr/src/gettext-$(gettext_version)'
 
 .PHONY: install-git
 install-git: CFLAGS := -I$(prefix)/include
 install-git: LDFLAGS := -L$(prefix)/lib -framework CoreFoundation -framework Security -framework SystemConfiguration
-install-git: EXTLIBS := $(prefix)/lib/libz.a $(prefix)/lib/libiconv.a $(prefix)/lib/libintl.a $(prefix)/lib/libpcre2-8.a -framework CoreFoundation -framework Security -framework SystemConfiguration
+install-git: EXTLIBS := $(prefix)/lib/libz.a -liconv $(prefix)/lib/libintl.a $(prefix)/lib/libpcre2-8.a -framework CoreFoundation -framework Security -framework SystemConfiguration
 install-git: MAKE_VARS := PKG_CONFIG_PATH='$(pkg_config_path)' USE_LIBPCRE2=Yes ZLIB_PATH='$(prefix)'
 install-git: ## [subtarget] install git
 	@test -d '$(root)/usr/src/git-$(git_version)' || \
