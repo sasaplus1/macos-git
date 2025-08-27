@@ -49,7 +49,7 @@ expat_configs := $(strip \
   --without-tests \
 )
 
-pcre2_version := 10.45
+pcre2_version := 10.46
 pcre2_configs := $(strip \
   --enable-jit \
   --enable-pcre2-8 \
