@@ -81,7 +81,7 @@ gettext_configs := $(strip \
   --without-xz \
 )
 
-git_version := 2.51.1
+git_version := 2.52.0
 git_configs := $(strip \
   NO_OPENSSL=YesPlease \
   NEEDS_LIBICONV=YesPlease \
