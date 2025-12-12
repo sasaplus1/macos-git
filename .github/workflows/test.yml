@@ -35,7 +35,7 @@ jobs:
       - run: ccache -z  # Zero statistics
       - id: ccache
         run: echo "cache_dir=$(ccache --show-config | grep cache_dir | awk '{ print $4 }')" | tee -a "$GITHUB_OUTPUT"
-      - uses: actions/cache/restore@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
+      - uses: actions/cache/restore@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         id: cache-restore
         with:
           path: |
@@ -69,7 +69,7 @@ jobs:
       - run: make install-git
       - run: ccache -s
       - if: github.ref_name == 'master'
-        uses: actions/cache/save@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
+        uses: actions/cache/save@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         with:
           path: |
             ${{ steps.ccache.outputs.cache_dir }}
