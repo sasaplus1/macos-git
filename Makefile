@@ -113,7 +113,7 @@ download-zlib: ## [subtarget] download zlib archive
 .PHONY: download-libiconv
 download-libiconv: ## [subtarget] download libiconv archive
 	@test -f '$(root)/usr/src/libiconv-$(libiconv_version).tar.gz' || \
-		curl -fsSL -o '$(root)/usr/src/libiconv-$(libiconv_version).tar.gz' https://ftpmirror.gnu.org/pub/gnu/libiconv/libiconv-$(libiconv_version).tar.gz
+		curl -fsSL -o '$(root)/usr/src/libiconv-$(libiconv_version).tar.gz' https://ftpmirror.gnu.org/gnu/libiconv/libiconv-$(libiconv_version).tar.gz
 
 .PHONY: download-curl
 download-curl: ## [subtarget] download curl archive
