@@ -113,7 +113,7 @@ download-zlib: ## [subtarget] download zlib archive
 .PHONY: download-libiconv
 download-libiconv: ## [subtarget] download libiconv archive
 	@test -f '$(root)/usr/src/libiconv-$(libiconv_version).tar.gz' || \
-		curl -fsSL -o '$(root)/usr/src/libiconv-$(libiconv_version).tar.gz' https://ftp.gnu.org/pub/gnu/libiconv/libiconv-$(libiconv_version).tar.gz
+		curl -fsSL -o '$(root)/usr/src/libiconv-$(libiconv_version).tar.gz' https://ftpmirror.gnu.org/pub/gnu/libiconv/libiconv-$(libiconv_version).tar.gz
 
 .PHONY: download-curl
 download-curl: ## [subtarget] download curl archive
@@ -133,7 +133,7 @@ download-pcre2: ## [subtarget] download pcre2 archive
 .PHONY: download-gettext
 download-gettext: ## [subtarget] download gettext archive
 	@test -f '$(root)/usr/src/gettext-$(gettext_version).tar.gz' || \
-		curl -fsSL -o '$(root)/usr/src/gettext-$(gettext_version).tar.gz' https://ftp.gnu.org/gnu/gettext/gettext-$(gettext_version).tar.gz
+		curl -fsSL -o '$(root)/usr/src/gettext-$(gettext_version).tar.gz' https://ftpmirror.gnu.org/gnu/gettext/gettext-$(gettext_version).tar.gz
 
 .PHONY: download-git
 download-git: ## [subtarget] download git archive
