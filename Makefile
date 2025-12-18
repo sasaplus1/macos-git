@@ -18,14 +18,6 @@ zlib_configs := $(strip \
   --static \
 )
 
-libiconv_version := 1.18
-libiconv_configs := $(strip \
-  --enable-static \
-  --disable-shared \
-  --enable-extra-encodings \
-  --disable-rpath \
-)
-
 curl_version := 8.11.1
 curl_configs := $(strip \
   --enable-static \
@@ -63,7 +55,7 @@ gettext_configs := $(strip \
   --enable-static \
   --disable-shared \
   --with-included-gettext \
-  --with-libiconv-prefix=$(prefix) \
+  --without-libiconv-prefix \
   --disable-java \
   --disable-csharp \
   --disable-rpath \
@@ -84,7 +76,7 @@ gettext_configs := $(strip \
 git_version := 2.52.0
 git_configs := $(strip \
   NO_OPENSSL=YesPlease \
-  NEEDS_LIBICONV=YesPlease \
+  NO_DARWIN_PORTS=YesPlease \
 )
 
 .PHONY: all
@@ -98,7 +90,6 @@ clean: ## remove files
 .PHONY: install
 install: ## install git and dependencies
 install: download-zlib install-zlib
-install: download-libiconv install-libiconv
 install: download-curl install-curl
 install: download-expat install-expat
 install: download-pcre2 install-pcre2
@@ -109,11 +100,6 @@ install: download-git install-git
 download-zlib: ## [subtarget] download zlib archive
 	@test -f '$(root)/usr/src/zlib-$(zlib_version).tar.gz' || \
 		curl -fsSL -o '$(root)/usr/src/zlib-$(zlib_version).tar.gz' https://github.com/madler/zlib/releases/download/v$(zlib_version)/zlib-$(zlib_version).tar.gz
-
-.PHONY: download-libiconv
-download-libiconv: ## [subtarget] download libiconv archive
-	@test -f '$(root)/usr/src/libiconv-$(libiconv_version).tar.gz' || \
-		curl -fsSL -o '$(root)/usr/src/libiconv-$(libiconv_version).tar.gz' https://ftpmirror.gnu.org/gnu/libiconv/libiconv-$(libiconv_version).tar.gz
 
 .PHONY: download-curl
 download-curl: ## [subtarget] download curl archive
@@ -148,14 +134,6 @@ install-zlib: ## [subtarget] install zlib
 	make -j$(nproc) -C '$(root)/usr/src/zlib-$(zlib_version)'
 	make install -C '$(root)/usr/src/zlib-$(zlib_version)'
 
-.PHONY: install-libiconv
-install-libiconv: ## [subtarget] install libiconv
-	@test -d '$(root)/usr/src/libiconv-$(libiconv_version)' || \
-		tar fvx '$(root)/usr/src/libiconv-$(libiconv_version).tar.gz' -C '$(root)/usr/src'
-	cd '$(root)/usr/src/libiconv-$(libiconv_version)' && ./configure --prefix='$(prefix)' $(libiconv_configs)
-	make -j$(nproc) -C '$(root)/usr/src/libiconv-$(libiconv_version)'
-	make install -C '$(root)/usr/src/libiconv-$(libiconv_version)'
-
 .PHONY: install-curl
 install-curl: ## [subtarget] install curl
 	@test -d '$(root)/usr/src/curl-$(curl_version)' || \
@@ -181,17 +159,20 @@ install-pcre2: ## [subtarget] install pcre2
 	make install -C '$(root)/usr/src/pcre2-$(pcre2_version)'
 
 .PHONY: install-gettext
+install-gettext: CFLAGS := -Wno-incompatible-function-pointer-types
 install-gettext: ## [subtarget] install gettext
 	@test -d '$(root)/usr/src/gettext-$(gettext_version)' || \
 		tar fvx '$(root)/usr/src/gettext-$(gettext_version).tar.gz' -C '$(root)/usr/src'
-	cd '$(root)/usr/src/gettext-$(gettext_version)' && ./configure --prefix='$(prefix)' $(gettext_configs)
+	cd '$(root)/usr/src/gettext-$(gettext_version)' && CFLAGS='$(CFLAGS)' ./configure --prefix='$(prefix)' $(gettext_configs)
 	make -j$(nproc) -C '$(root)/usr/src/gettext-$(gettext_version)'
 	make install -C '$(root)/usr/src/gettext-$(gettext_version)'
 
 .PHONY: install-git
+# Clean PATH to exclude MacPorts/Homebrew, use only system and our binaries
+install-git: clean_path := $(prefix)/bin:/usr/bin:/bin:/usr/sbin:/sbin
 install-git: CFLAGS := -I$(prefix)/include
 install-git: LDFLAGS := -L$(prefix)/lib -framework CoreFoundation -framework Security -framework SystemConfiguration
-install-git: EXTLIBS := $(prefix)/lib/libz.a $(prefix)/lib/libiconv.a $(prefix)/lib/libintl.a $(prefix)/lib/libpcre2-8.a -framework CoreFoundation -framework Security -framework SystemConfiguration
+install-git: EXTLIBS := $(prefix)/lib/libz.a -liconv $(prefix)/lib/libintl.a $(prefix)/lib/libpcre2-8.a -framework CoreFoundation -framework Security -framework SystemConfiguration
 install-git: MAKE_VARS := PKG_CONFIG_PATH='$(pkg_config_path)' USE_LIBPCRE2=Yes ZLIB_PATH='$(prefix)'
 install-git: ## [subtarget] install git
 	@test -d '$(root)/usr/src/git-$(git_version)' || \
@@ -210,5 +191,5 @@ install-git: ## [subtarget] install git
 			'$(root)/usr/src/git-$(git_version)'/GIT-USER-AGENT \
 			'$(root)/usr/src/git-$(git_version)'/GIT-VERSION-FILE \
 			'$(root)/usr/src/git-$(git_version)'/config.status
-	cd '$(root)/usr/src/git-$(git_version)' && $(git_configs) $(MAKE_VARS) make prefix='$(prefix)' -j$(nproc) CFLAGS='$(CFLAGS)' LDFLAGS='$(LDFLAGS)' EXTLIBS='$(EXTLIBS)'
-	$(git_configs) $(MAKE_VARS) make install prefix='$(prefix)' -C '$(root)/usr/src/git-$(git_version)' EXTLIBS='$(EXTLIBS)'
+	cd '$(root)/usr/src/git-$(git_version)' && PATH='$(clean_path)' make $(git_configs) $(MAKE_VARS) prefix='$(prefix)' -j$(nproc) CFLAGS='$(CFLAGS)' LDFLAGS='$(LDFLAGS)' EXTLIBS='$(EXTLIBS)'
+	PATH='$(clean_path)' make $(git_configs) $(MAKE_VARS) install prefix='$(prefix)' -C '$(root)/usr/src/git-$(git_version)' EXTLIBS='$(EXTLIBS)'

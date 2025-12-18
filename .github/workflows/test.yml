@@ -53,8 +53,6 @@ jobs:
       # Build dependencies in order
       - run: make download-zlib
       - run: make install-zlib
-      - run: make download-libiconv
-      - run: make install-libiconv
       - run: make download-curl
       - run: make install-curl
       - run: make download-expat
