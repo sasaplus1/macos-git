@@ -13,7 +13,7 @@ nproc := $(shell getconf _NPROCESSORS_ONLN)
 
 pkg_config_path := $(abspath $(prefix)/lib/pkgconfig)
 
-zlib_version := 1.3.1
+zlib_version := 1.3.2
 zlib_configs := $(strip \
   --static \
 )
