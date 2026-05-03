@@ -85,7 +85,7 @@ all: ## output targets
 
 .PHONY: clean
 clean: ## remove files
-	$(RM) -r $(root)/usr/bin/* $(root)/usr/include/* $(root)/usr/lib/* $(root)/usr/libexec/* $(root)/usr/man/* $(root)/usr/share/* $(root)/usr/src/*
+	$(RM) -r $(root)/usr/.stamps/* $(root)/usr/bin/* $(root)/usr/include/* $(root)/usr/lib/* $(root)/usr/libexec/* $(root)/usr/man/* $(root)/usr/share/* $(root)/usr/src/*
 
 .PHONY: install
 install: ## install git and dependencies
@@ -158,14 +158,23 @@ install-pcre2: ## [subtarget] install pcre2
 	make -j$(nproc) -C '$(root)/usr/src/pcre2-$(pcre2_version)'
 	make install -C '$(root)/usr/src/pcre2-$(pcre2_version)'
 
+gettext_stamp := $(prefix)/.stamps/gettext-$(gettext_version)
+
 .PHONY: install-gettext
 install-gettext: CFLAGS := -Wno-incompatible-function-pointer-types
 install-gettext: ## [subtarget] install gettext
+install-gettext: $(gettext_stamp)
+
+# stamp file lets `make` short-circuit when the cached output is restored from CI cache
+$(gettext_stamp): CFLAGS := -Wno-incompatible-function-pointer-types
+$(gettext_stamp):
+	$(MAKE) download-gettext
 	@test -d '$(root)/usr/src/gettext-$(gettext_version)' || \
 		tar fvx '$(root)/usr/src/gettext-$(gettext_version).tar.gz' -C '$(root)/usr/src'
 	cd '$(root)/usr/src/gettext-$(gettext_version)' && CFLAGS='$(CFLAGS)' ./configure --prefix='$(prefix)' $(gettext_configs)
 	make -j$(nproc) -C '$(root)/usr/src/gettext-$(gettext_version)'
 	make install -C '$(root)/usr/src/gettext-$(gettext_version)'
+	@mkdir -p '$(prefix)/.stamps' && touch '$@'
 
 .PHONY: install-git
 # Clean PATH to exclude MacPorts/Homebrew, use only system and our binaries

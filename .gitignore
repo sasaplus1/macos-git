@@ -1,5 +1,8 @@
 ## sasaplus1/macos-git
 
+/usr/.stamps/**
+!/usr/.stamps/.gitkeep
+
 /usr/bin/**
 !/usr/bin/.gitkeep
 
