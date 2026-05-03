@@ -49,6 +49,22 @@ jobs:
             ccache-
       - id: machine-arch
         run: echo "name=$(arch)" | tee -a "$GITHUB_OUTPUT"
+      # gettext is the slowest dep (5-7 min). Cache its build output keyed on
+      # version + configs so the only PRs that pay the gettext build cost are
+      # those that actually bump gettext itself.
+      - id: gettext-meta
+        run: |
+          set -e
+          ver=$(awk '$1 == "gettext_version" { print $3 }' Makefile)
+          h=$(awk '
+            /^gettext_version/ { print; next }
+            /^gettext_configs/ { in_block=1; print; if ($0 !~ /\\$/) in_block=0; next }
+            in_block { print; if ($0 !~ /\\$/) in_block=0 }
+          ' Makefile | shasum -a 256 | cut -c1-12)
+          {
+            echo "version=$ver"
+            echo "hash=$h"
+          } | tee -a "$GITHUB_OUTPUT"
       - run: make
       # Build dependencies in order
       - run: make download-zlib
@@ -60,13 +76,57 @@ jobs:
       - run: make download-pcre2
       - run: make install-pcre2
       - run: make download-gettext
+      - id: cache-gettext
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: |
+            usr/.stamps/gettext-${{ steps.gettext-meta.outputs.version }}
+            usr/lib/libintl*
+            usr/lib/libgettext*
+            usr/lib/libtextstyle*
+            usr/include/libintl.h
+            usr/include/gettext-po.h
+            usr/include/textstyle*
+            usr/bin/msg*
+            usr/bin/xgettext
+            usr/bin/gettext
+            usr/bin/ngettext
+            usr/bin/envsubst
+            usr/bin/recode-sr-latin
+            usr/bin/gettextize
+            usr/bin/autopoint
+            usr/share/gettext
+            usr/share/locale
+          key: gettext-${{ matrix.os }}-${{ runner.arch }}-${{ steps.gettext-meta.outputs.hash }}
       - run: make install-gettext
+      - if: github.ref_name == 'main' && steps.cache-gettext.outputs.cache-hit != 'true'
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: |
+            usr/.stamps/gettext-${{ steps.gettext-meta.outputs.version }}
+            usr/lib/libintl*
+            usr/lib/libgettext*
+            usr/lib/libtextstyle*
+            usr/include/libintl.h
+            usr/include/gettext-po.h
+            usr/include/textstyle*
+            usr/bin/msg*
+            usr/bin/xgettext
+            usr/bin/gettext
+            usr/bin/ngettext
+            usr/bin/envsubst
+            usr/bin/recode-sr-latin
+            usr/bin/gettextize
+            usr/bin/autopoint
+            usr/share/gettext
+            usr/share/locale
+          key: gettext-${{ matrix.os }}-${{ runner.arch }}-${{ steps.gettext-meta.outputs.hash }}
       - run: ccache -s
       # Build Git
       - run: make download-git
       - run: make install-git
       - run: ccache -s
-      - if: github.ref_name == 'master'
+      - if: github.ref_name == 'main'
         uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: |
