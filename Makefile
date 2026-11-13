@@ -73,7 +73,7 @@ gettext_configs := $(strip \
   --without-xz \
 )
 
-git_version := 2.54.0
+git_version := 2.56.1
 git_configs := $(strip \
   NO_OPENSSL=YesPlease \
   NO_DARWIN_PORTS=YesPlease \
