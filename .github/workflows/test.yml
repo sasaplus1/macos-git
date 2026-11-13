@@ -20,10 +20,8 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          # - macos-13
-          # arm64
-          - macos-14
           - macos-15
+          - macos-26
     env:
       CC: 'ccache gcc'
     runs-on: ${{ matrix.os }}
